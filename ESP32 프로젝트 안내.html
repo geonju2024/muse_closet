@@ -1,0 +1,152 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ESP32 프로젝트 안내</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 16:9 slide frame on an engineering-drawing ground, two slides, arrow keys / buttons; stacks to natural height on phones */
+:root{
+  --ground:#e9ebe6; --sheet:#f8f8f4; --ink:#1d2421; --muted:#5f6a64; --rule:#c9cec7;
+  --copper:#b2562a; --signal:#2f7a5a; --tint:#efe3d9;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#121614; --sheet:#1a201d; --ink:#e7ebe6; --muted:#9aa59f; --rule:#323b36;
+  --copper:#e08a5c; --signal:#5fbf93; --tint:#2c2520; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#121614; --sheet:#1a201d; --ink:#e7ebe6; --muted:#9aa59f; --rule:#323b36;
+  --copper:#e08a5c; --signal:#5fbf93; --tint:#2c2520; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
+.deck{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.slide{container-type:inline-size;background:var(--sheet);border:1px solid var(--rule);aspect-ratio:16/9;
+  position:relative;overflow:hidden;
+  background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:40px 40px;background-position:-1px -1px}
+.slide::before{content:"";position:absolute;inset:0;background:var(--sheet);opacity:.9;pointer-events:none}
+.inner{position:relative;height:100%;padding:4.2cqw 4.6cqw 3.4cqw;display:flex;flex-direction:column;gap:2.2cqw}
+.slide[hidden]{display:none!important}
+
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font-family:var(--mono);
+  font-size:max(11px,1.05cqw);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.top b{color:var(--copper);font-weight:500}
+h1,h2{margin:0;text-wrap:balance;letter-spacing:-.02em}
+h1{font-size:max(32px,5.4cqw);line-height:1.1;font-weight:700}
+h1 em{font-style:normal;color:var(--copper)}
+h2{font-size:max(24px,3cqw);line-height:1.2;font-weight:700}
+.lede{font-size:max(15px,1.6cqw);color:var(--muted);max-width:60ch;margin:0}
+.lede strong{color:var(--ink);font-weight:500}
+
+h1,h2,h3,p{word-break:keep-all;overflow-wrap:break-word}
+
+/* slide 1 */
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2.4cqw;min-height:0}
+#s1 h1{font-size:max(36px,7cqw)}
+
+/* slide 2: one row per condition so each title stays on a single line */
+.conds{display:flex;flex-direction:column;flex:1;min-height:0;justify-content:center}
+.cond{display:grid;grid-template-columns:9cqw 1fr;align-items:baseline;gap:2cqw;padding-block:2cqw;border-top:1px solid var(--rule);min-width:0}
+.cond:last-child{border-bottom:1px solid var(--rule)}
+.cond .tag{font-family:var(--mono);font-size:max(12px,1.3cqw);color:var(--copper);letter-spacing:.08em;white-space:nowrap}
+.cond h3{margin:0;font-size:max(22px,3.6cqw);line-height:1.2;letter-spacing:-.02em;min-width:0}
+.cond p{margin:0;font-size:max(13px,1.22cqw);color:var(--muted)}
+.cond ul{margin:0;padding-left:1.1em;font-size:max(13px,1.2cqw);display:grid;gap:.35cqw}
+.ex{margin-top:auto;display:flex;flex-direction:column;gap:.4cqw}
+.ex .exl{font-family:var(--mono);font-size:max(10px,.85cqw);color:var(--muted);letter-spacing:.08em}
+.code{font-family:var(--mono);font-size:max(11px,1cqw);background:var(--tint);padding:1cqw 1.2cqw;line-height:1.6;overflow-x:auto;white-space:pre}
+.code .c{color:var(--muted)} .code .h{color:var(--copper)}
+.steps{display:flex;flex-wrap:wrap;gap:.5cqw;font-family:var(--mono);font-size:max(11px,.98cqw)}
+.steps span{border:1px solid var(--rule);padding:.3em .6em;background:var(--sheet)}
+.foot{font-size:max(12px,1.1cqw);color:var(--muted);border-top:1px solid var(--rule);padding-top:1cqw}
+.foot strong{color:var(--ink);font-weight:500}
+
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.nav .btns{display:flex;gap:8px}
+.nav button{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);padding:8px 14px;cursor:pointer}
+.nav button:hover:not(:disabled){border-color:var(--copper);color:var(--copper)}
+.nav button:disabled{opacity:.4;cursor:default}
+.nav button:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+.dots{display:flex;gap:6px}
+.dots i{width:22px;height:3px;background:var(--rule)} .dots i.on{background:var(--copper)}
+
+@media (max-width:760px){
+  .slide{aspect-ratio:auto}
+  .inner{padding:22px 18px;gap:18px}
+  .cond{grid-template-columns:1fr;gap:6px;padding-block:16px}
+  .hero{gap:14px;padding-block:24px}
+}
+@media (prefers-reduced-motion:no-preference){ .slide:not([hidden]) .inner{animation:in .35s ease-out} }
+@keyframes in{from{transform:translateY(6px)}to{transform:none}}
+</style>
+
+<main class="deck">
+  <!-- Slide 1 -->
+  <section class="slide" id="s1" aria-label="1. 주제 안내">
+    <div class="inner">
+      <div class="top"><span><b>ESP32 프로젝트</b> · 안내</span><span>01 / 02 · 주제</span></div>
+      <div class="hero">
+        <h1>주제는 <em>자유</em>입니다</h1>
+        <p class="lede">무엇을 만들지는 팀이 직접 정합니다. 관심 있는 분야, 일상의 불편함, 해보고 싶었던 아이디어 무엇이든 좋습니다. 단, <strong>다음 페이지의 필수 조건 세 가지</strong>를 모두 담아야 합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 2 -->
+  <section class="slide" id="s2" aria-label="2. 필수 조건" hidden>
+    <div class="inner">
+      <div class="top"><span><b>ESP32 프로젝트</b> · 안내</span><span>02 / 02 · 필수 조건</span></div>
+      <h2>어떤 주제든 이 세 가지는 반드시 포함</h2>
+      <div class="conds">
+        <article class="cond">
+          <span class="tag">조건 1</span>
+          <h3>ESP32에 모델을 넣어 사용</h3>
+        </article>
+        <article class="cond">
+          <span class="tag">조건 2</span>
+          <h3>로그를 DB에 저장</h3>
+        </article>
+        <article class="cond">
+          <span class="tag">조건 3</span>
+          <h3>CI 구현</h3>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <nav class="nav" aria-label="슬라이드 이동">
+    <div class="dots"><i class="on"></i><i></i></div>
+    <span id="count">1 / 2 · ← → 키로 이동</span>
+    <div class="btns">
+      <button id="prev" type="button" disabled>이전</button>
+      <button id="next" type="button">다음</button>
+    </div>
+  </nav>
+</main>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll(".slide")],dots=[...document.querySelectorAll(".dots i")];
+  const prev=document.getElementById("prev"),next=document.getElementById("next"),count=document.getElementById("count");
+  let i=0;
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.hidden=k!==i);
+    dots.forEach((d,k)=>d.classList.toggle("on",k===i));
+    prev.disabled=i===0;next.disabled=i===slides.length-1;
+    count.textContent=(i+1)+" / "+slides.length+" · ← → 키로 이동";
+    if(location.hash!=="#"+slides[i].id) history.replaceState(null,"","#"+slides[i].id);
+  }
+  prev.onclick=()=>show(i-1);next.onclick=()=>show(i+1);
+  document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowRight"||e.key==="PageDown"||e.key===" "){e.preventDefault();show(i+1);}
+    if(e.key==="ArrowLeft"||e.key==="PageUp"){e.preventDefault();show(i-1);}
+  });
+  function fromHash(){const k=slides.findIndex(s=>"#"+s.id===location.hash);show(k<0?0:k);}
+  window.addEventListener("hashchange",fromHash);fromHash();
+})();
+</script>
+
+</body></html>
