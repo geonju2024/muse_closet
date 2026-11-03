@@ -100,7 +100,7 @@ void setup() {
   }
   Serial.println("Camera initialized");
   closetConnectWifi();
-  Serial.println("Ready. 'c' = 추론+DB저장, 't' = 추론만");
+  Serial.println("Ready. 'c' = 추론+DB저장, 't' = 추론만 (build " __DATE__ " " __TIME__ ")");
 }
 
 void loop() {
@@ -109,6 +109,8 @@ void loop() {
     return;
   }
   char ch = Serial.read();
+  if (ch == '\r' || ch == '\n') return;
+  Serial.printf("> key '%c' received\n", ch);
   if (ch == 'c' || ch == 'C') classify_once(true);
   else if (ch == 't' || ch == 'T') classify_once(false);
 }
@@ -122,10 +124,13 @@ static void classify_once(bool upload) {
   camera_fb_t *stale = esp_camera_fb_get();
   if (stale) esp_camera_fb_return(stale);
 
+  Serial.println("  capturing...");
   if (!ei_camera_capture(EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT, snapshot_buf)) {
     Serial.println("Failed to capture image");
     return;
   }
+  Serial.printf("  running model... (free heap %u, free PSRAM %u)\n", ESP.getFreeHeap(), ESP.getFreePsram());
+  Serial.flush();
 
   ei::signal_t signal;
   signal.total_length = EI_CLASSIFIER_INPUT_WIDTH * EI_CLASSIFIER_INPUT_HEIGHT;

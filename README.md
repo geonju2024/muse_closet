@@ -5,7 +5,7 @@ Seeed Studio **XIAO ESP32S3 Sense (OV3660)** 가 카메라로 의류 사진을 �
 
 > 이 저장소는 하루 동안 만든 MVP이며 완성된 제품이 아닙니다. 평가는 실제 옷이 아니라 **학습에 쓰지 않은 데이터셋 이미지를 노트북 화면에 띄워 OV3660으로 촬영**하는 방식으로 설계했습니다(아래 [한계](#9-한계와-개선-방향) 참고).
 
-> ⚠️ **실기기 평가 미완료**: 제출 시점까지 수정된 펌웨어의 실기기 업로드가 끝나지 않아, ESP32에서의 추론 성공·DB 저장·15회 평가는 **측정하지 못했습니다.** 아래 문서에 정확도·추론 시간 수치는 기재하지 않았으며, 검증된 범위와 남은 작업은 [§7 평가](#7-평가)에 정리했습니다.
+> ⚠️ **15회 실기기 평가 미완료**: ESP32에서의 **추론과 DB 저장은 실기기에서 확인**했지만(추론 176 ms, DB 저장 성공), 정확도 측정을 위한 **15회 평가는 진행하지 못했습니다.** 따라서 정확도 수치는 기재하지 않았습니다. 검증 범위와 남은 작업은 [§7 평가](#7-평가)에 정리했습니다.
 
 ## 1. 필수 조건 충족 현황
 
@@ -15,7 +15,7 @@ Seeed Studio **XIAO ESP32S3 Sense (OV3660)** 가 카메라로 의류 사진을 �
 | **② 로그를 DB에 저장** | 추론 직후 `POST /api/predictions` → SQLite `prediction_logs` 테이블, 대시보드(`/`)에서 5초마다 갱신 | `backend/main.py`, `closet_logger.h` |
 | **③ CI 구현** | GitHub Actions 3개 job: 백엔드 테스트, 카메라 스케치 빌드, **모델 포함 최종 펌웨어 빌드** | `.github/workflows/ci.yml` |
 
-**검증 상태**: ①은 모델 포함 펌웨어의 **빌드(CI)와 실기기 부팅(PSRAM·카메라·Wi-Fi)까지 확인**했고, 실기기 추론은 첫 시도에서 라이브러리 메모리 오류로 실패한 뒤 수정본을 업로드하지 못해 **미확인**입니다. ②는 **서버 단위 테스트로만 검증**했고 실제 ESP32 → DB 저장은 미확인입니다. ③은 **완료**(3개 job 모두 통과)입니다.
+**검증 상태**: ① **실기기 확인** — ESP32-S3에서 모델 실행 성공(DSP 4 ms + NN 172 ms = 176 ms). ② **실기기 확인** — ESP32가 보낸 추론 결과가 SQLite에 저장됨(`DB upload status: 201`, `id=1`). ③ **완료** — 3개 job 모두 통과. 정확도 평가(15회)는 미완료입니다.
 
 ## 2. 시스템 구조
 
@@ -71,6 +71,7 @@ DB 스키마 `prediction_logs`: `id, created_at(UTC), device_id, category, confi
 | Edge Impulse 검증 정확도 | 미기록 (Edge Impulse 프로젝트 학습 결과에서 확인 가능) |
 | Edge Impulse 테스트(95장) 정확도 | 미기록 (Edge Impulse 프로젝트 Model testing에서 확인 가능) |
 | 펌웨어 크기 (CI 빌드 기준) | 플래시 1,505,753 B (45%) / 전역 RAM 63,036 B (19%) |
+| 실기기 추론 시간 (XIAO ESP32-S3) | DSP 4 ms + NN 172 ms = **176 ms** / 1회 |
 
 ## 5. 실행 방법
 
@@ -115,25 +116,37 @@ py tools/fill_eval_sheet.py               # 최근 ei-1.0.1 로그 15건을 tria
 py tools/fill_eval_sheet.py --first-id N  # 시험 기록이 섞였으면 trial 1의 DB id 지정
 ```
 
-**결과: 실기기 평가 미완료**
-
-평가 이미지 15장, 전체화면 뷰어, 평가표, 집계 스크립트는 준비했지만, 수정된 펌웨어의 실기기 업로드가 제출 시점까지 끝나지 않아 **평가를 진행하지 못했습니다.** 따라서 정확도·추론 시간 수치는 없습니다.
+**결과: 동작 확인 완료, 15회 정확도 평가 미완료**
 
 | 항목 | 상태 | 근거 |
 |---|---|---|
 | 모델 포함 최종 펌웨어 빌드 | ✅ 확인 | CI `inference-firmware-build` 통과 |
-| 실기기 부팅: PSRAM 8MB 인식, OV3660(PID 0x3660) 초기화, Wi-Fi 연결 | ✅ 확인 | 첫 업로드 시 시리얼 출력 |
-| 실기기 추론 (`run_classifier`) | ❌ 미확인 | 첫 업로드에서 tensor arena 오류로 크래시([§8](#8-문제-해결-기록)). 수정본은 CI 빌드만 통과, 실기기 업로드 미완료 |
-| ESP32 → DB 저장 (`DB upload status: 201`) | ❌ 미확인 | 서버 API는 pytest로 검증, 실제 기기 로그는 0건 |
-| 15회 평가: 전체·클래스별 정확도, 평균 추론 시간 | ❌ 미수행 | |
+| 실기기 부팅: PSRAM 8MB 인식, OV3660(PID 0x3660) 초기화, Wi-Fi 연결 | ✅ 확인 | 시리얼 출력 |
+| 실기기 추론 (`run_classifier`, ESP32-S3) | ✅ 확인 | 2회 실행, 매회 **DSP 4 ms + NN 172 ms = 176 ms** |
+| ESP32 → DB 저장 | ✅ 확인 | `DB upload status: 201`, `DB saved: id=1` / `GET /api/predictions`에 `device_id=xiao-esp32s3-01, model_version=ei-1.0.1` 행 존재 |
+| 15회 평가: 전체·클래스별 정확도 | ❌ 미수행 | 시간 부족 |
 
-**남은 작업**: 수정된 라이브러리로 업로드 → 시리얼 `t`/`c`로 추론·저장 확인 → `closet.db` 초기화 후 15회 평가 → `py tools/fill_eval_sheet.py` 출력(`docs/eval_results.md`)을 이 자리에 기재.
+실기기 시리얼 출력(발췌):
+```
+Camera PID: 0x3660
+WiFi connected, IP: 192.168.0.132
+[trial 2] DSP 4 ms, NN 172 ms
+  bottoms    0.7109
+  outerwear  0.0391
+  tops       0.2500
+RESULT trial=2 label=bottoms confidence=0.7109 inference_ms=176
+DB upload status: 201
+DB saved: id=1
+```
+위 2회는 동작 확인용 시험이며 정답 라벨을 기록하지 않았으므로 정확도 근거로 쓰지 않습니다. 첫 시도는 `bottoms`와 `tops`가 0.4961로 동점이었습니다(INT8 출력은 1/256 단위로 양자화됨).
+
+**남은 작업**: `closet.db` 초기화 → 뷰어로 15회 평가(`c`) → `py tools/fill_eval_sheet.py` 출력(`docs/eval_results.md`)을 이 자리에 기재.
 
 ## 8. 문제 해결 기록
 
 | 증상 | 원인 | 조치 |
 |---|---|---|
-| 첫 추론 시 `ERR: Failed to allocate persistent buffer of size 128, does not fit in tensor arena and reached EI_MAX_OVERFLOW_BUFFER_COUNT` 후 `Guru Meditation Error (StoreProhibited)`로 재부팅 | EON 모델의 tensor arena 크기 계산에 ESP-NN 커널의 계층별 persistent buffer가 포함되지 않음. 초과분 별도 할당 상한(10/30개)을 MobileNetV2가 넘고, 실패 시 NULL을 역참조 | `EI_MAX_OVERFLOW_BUFFER_COUNT`를 256으로 상향(`ei_classifier_porting.h`, `tflite_learn_*_compiled.cpp`). 추가 메모리 약 1KB. **CI 빌드만 확인, 실기기에서 해결 여부는 미확인** |
+| 첫 추론 시 `ERR: Failed to allocate persistent buffer of size 128, does not fit in tensor arena and reached EI_MAX_OVERFLOW_BUFFER_COUNT` 후 `Guru Meditation Error (StoreProhibited)`로 재부팅 | EON 모델의 tensor arena 크기 계산에 ESP-NN 커널의 계층별 persistent buffer가 포함되지 않음. 초과분 별도 할당 상한(10/30개)을 MobileNetV2가 넘고, 실패 시 NULL을 역참조 | `EI_MAX_OVERFLOW_BUFFER_COUNT`를 256으로 상향(`ei_classifier_porting.h`, `tflite_learn_*_compiled.cpp`). 추가 메모리 약 1KB. **실기기에서 해결 확인**(추론 정상 완료) |
 | `secrets.h`가 하위 폴더에서 Git 추적 대상이 됨 | `.gitignore`가 `firmware/secrets.h` 한 경로만 지정 | 모든 폴더의 `secrets.h` 무시로 변경. 실제 Wi-Fi 정보는 커밋된 적 없음 |
 | ESP32→서버 요청 차단 가능성 | 기존 python 허용 규칙이 Public 프로필 전용, 실제 네트워크는 Private | 8000/TCP, Private, LocalSubnet 한정 인바운드 규칙 추가 |
 
