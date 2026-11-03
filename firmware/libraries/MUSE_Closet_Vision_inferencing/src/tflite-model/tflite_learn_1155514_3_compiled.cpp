@@ -84,7 +84,7 @@ extern void ei_printf(const char *format, ...);
 #endif // EI_MAX_SCRATCH_BUFFER_COUNT
 
 #ifndef EI_MAX_OVERFLOW_BUFFER_COUNT
-#define EI_MAX_OVERFLOW_BUFFER_COUNT 10
+#define EI_MAX_OVERFLOW_BUFFER_COUNT 256  // MUSE: raised from 10
 #endif // EI_MAX_OVERFLOW_BUFFER_COUNT
 
 using namespace tflite;
