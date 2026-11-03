@@ -5,6 +5,6 @@ __pycache__/
 .env
 backend/closet.db
 backend/*.db
-firmware/secrets.h
+secrets.h
 .DS_Store
 data/

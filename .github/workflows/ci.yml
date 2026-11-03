@@ -26,3 +26,14 @@ jobs:
       - run: arduino-cli core install esp32:esp32@2.0.17 --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
       - run: arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3 firmware/camera_test
       - run: arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:PSRAM=opi firmware/camera_webserver
+
+  inference-firmware-build:
+    # Edge Impulse 모델(INT8) + 카메라 + Wi-Fi/DB 로그를 포함한 최종 ESP32 펌웨어 컴파일 검증
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - run: arduino-cli core update-index --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+      - run: arduino-cli core install esp32:esp32@2.0.17 --additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+      - run: arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32S3:PSRAM=opi --libraries firmware/libraries firmware/closet_inference
