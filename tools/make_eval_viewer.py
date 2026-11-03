@@ -42,12 +42,12 @@ with open(out / "eval_sheet.csv", "w", newline="", encoding="utf-8-sig") as f:
         w.writerow([it["trial"], it["file"], it["truth"], "", "", "", "", "", it["source"]])
 
 html = """<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>Closet Eval Viewer</title>
-<style>html,body{margin:0;height:100%;background:#000;overflow:hidden;cursor:none}
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}
 img{width:100vw;height:100vh;object-fit:contain;display:block}
 #info{position:fixed;left:12px;bottom:10px;font:14px monospace;color:#888;display:none}
 #help{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#ccc;font:18px sans-serif;text-align:center;background:#000}</style></head>
 <body><img id="im" alt=""><div id="info"></div>
-<div id="help">←/→ 이전·다음 &nbsp;·&nbsp; F 전체화면 &nbsp;·&nbsp; I 정답/번호 표시 토글<br><br>아무 키나 눌러 시작</div>
+<div id="help">사진 클릭 또는 → 다음 &nbsp;·&nbsp; ← 이전 &nbsp;·&nbsp; F 전체화면 &nbsp;·&nbsp; I 정답/번호 표시 토글<br><br>클릭하거나 아무 키나 눌러 시작</div>
 <script>
 const items=__ITEMS__;let i=0;
 const im=document.getElementById('im'),info=document.getElementById('info'),help=document.getElementById('help');
@@ -58,6 +58,8 @@ document.addEventListener('keydown',e=>{help.style.display='none';
  else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
  else if(e.key==='i'||e.key==='I'){info.style.display=info.style.display==='block'?'none':'block';}
  show();});
+im.addEventListener('click',()=>{help.style.display='none';i=Math.min(items.length-1,i+1);show();});
+help.addEventListener('click',()=>{help.style.display='none';});
 show();
 </script></body></html>""".replace("__ITEMS__", json.dumps(items, ensure_ascii=False))
 (out / "viewer.html").write_text(html, encoding="utf-8")

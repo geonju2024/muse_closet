@@ -1,0 +1,16 @@
+﻿trial,file,truth,pred,confidence,inference_ms,db_id,correct,source
+1,img/tops_05.jpg,tops,bottoms,0.8984,176,3,X,shirt/28f642a1-d171-4af0-8bcf-4bce9a2ff55c.jpg
+2,img/outerwear_05.jpg,outerwear,bottoms,0.8086,176,4,X,outwear/62c7effa-be77-4a26-bb0d-3cf9373ce3ae.jpg
+3,img/bottoms_04.jpg,bottoms,bottoms,0.9648,176,5,O,pants/c1bc116b-d8b8-4ac4-afe7-a7b94d7e0aba.jpg
+4,img/bottoms_02.jpg,bottoms,bottoms,0.6484,176,6,O,shorts/06248e28-9e26-4036-8a8f-40cc605c83fb.jpg
+5,img/tops_01.jpg,tops,tops,0.6406,176,7,O,t-shirt/e74aed45-b484-4098-936f-29b47537c909.jpg
+6,img/outerwear_03.jpg,outerwear,tops,0.7266,176,8,X,outwear/0d73e759-eeaa-43ab-98d4-196b6974c41e.jpg
+7,img/outerwear_02.jpg,outerwear,tops,0.6758,176,9,X,outwear/2057e208-3431-4fc7-91e6-b1b5dee502fb.jpg
+8,img/bottoms_05.jpg,bottoms,tops,0.6992,176,10,X,shorts/3571680c-6a00-4202-8bab-1679116cbe7c.jpg
+9,img/tops_03.jpg,tops,bottoms,0.7734,176,11,X,longsleeve/bca2c322-fe54-4240-8027-0c49ef6a7e74.jpg
+10,img/bottoms_01.jpg,bottoms,bottoms,0.7773,176,12,O,pants/f5eeebcb-1999-4048-af2d-9f47873458db.jpg
+11,img/outerwear_01.jpg,outerwear,tops,0.9180,176,13,X,outwear/fff6b588-6b62-4de8-8e06-f726000a12f8.jpg
+12,img/tops_02.jpg,tops,bottoms,0.5664,177,14,X,shirt/4db14d3d-05ca-48b1-9257-204b447c27bb.jpg
+13,img/bottoms_03.jpg,bottoms,bottoms,0.6016,176,15,O,skirt/7e77ec6d-2bd6-45c7-9904-cf1fae288afc.jpg
+14,img/tops_04.jpg,tops,tops,0.6406,176,16,O,t-shirt/f6101867-7e1c-4fa1-850a-8e4f16bd3846.jpg
+15,img/outerwear_04.jpg,outerwear,bottoms,0.8555,176,17,X,outwear/c99c0a08-e27a-49a7-a24e-f088ff9ac3ce.jpg
