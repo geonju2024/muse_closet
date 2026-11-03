@@ -3,7 +3,9 @@
 Seeed Studio **XIAO ESP32S3 Sense (OV3660)** 가 카메라로 의류 사진을 촬영하고, **ESP32-S3 안에서 직접** 경량 CNN(MobileNetV2, INT8)을 실행해
 **상의(tops) / 하의(bottoms) / 아우터(outerwear)** 로 분류한 뒤, 추론 결과를 Wi-Fi로 노트북의 **FastAPI + SQLite** 에 로그로 저장하는 1일 MVP입니다.
 
-> 이 저장소는 하루 동안 만든 MVP이며 완성된 제품이 아닙니다. 평가는 실제 옷이 아니라 **학습에 쓰지 않은 데이터셋 이미지를 노트북 화면에 띄워 OV3660으로 촬영**하는 방식으로 진행했습니다(아래 [한계](#9-한계와-개선-방향) 참고).
+> 이 저장소는 하루 동안 만든 MVP이며 완성된 제품이 아닙니다. 평가는 실제 옷이 아니라 **학습에 쓰지 않은 데이터셋 이미지를 노트북 화면에 띄워 OV3660으로 촬영**하는 방식으로 설계했습니다(아래 [한계](#9-한계와-개선-방향) 참고).
+
+> ⚠️ **실기기 평가 미완료**: 제출 시점까지 수정된 펌웨어의 실기기 업로드가 끝나지 않아, ESP32에서의 추론 성공·DB 저장·15회 평가는 **측정하지 못했습니다.** 아래 문서에 정확도·추론 시간 수치는 기재하지 않았으며, 검증된 범위와 남은 작업은 [§7 평가](#7-평가)에 정리했습니다.
 
 ## 1. 필수 조건 충족 현황
 
@@ -12,6 +14,8 @@ Seeed Studio **XIAO ESP32S3 Sense (OV3660)** 가 카메라로 의류 사진을 �
 | **① ESP32에 모델을 넣어 사용** | Edge Impulse로 학습한 MobileNetV2 INT8 모델을 Arduino 라이브러리로 펌웨어에 포함, `run_classifier()`를 ESP32-S3에서 실행(서버 추론 없음) | `firmware/closet_inference/`, `firmware/libraries/MUSE_Closet_Vision_inferencing/` |
 | **② 로그를 DB에 저장** | 추론 직후 `POST /api/predictions` → SQLite `prediction_logs` 테이블, 대시보드(`/`)에서 5초마다 갱신 | `backend/main.py`, `closet_logger.h` |
 | **③ CI 구현** | GitHub Actions 3개 job: 백엔드 테스트, 카메라 스케치 빌드, **모델 포함 최종 펌웨어 빌드** | `.github/workflows/ci.yml` |
+
+**검증 상태**: ①은 모델 포함 펌웨어의 **빌드(CI)와 실기기 부팅(PSRAM·카메라·Wi-Fi)까지 확인**했고, 실기기 추론은 첫 시도에서 라이브러리 메모리 오류로 실패한 뒤 수정본을 업로드하지 못해 **미확인**입니다. ②는 **서버 단위 테스트로만 검증**했고 실제 ESP32 → DB 저장은 미확인입니다. ③은 **완료**(3개 job 모두 통과)입니다.
 
 ## 2. 시스템 구조
 
@@ -64,8 +68,8 @@ DB 스키마 `prediction_logs`: `id, created_at(UTC), device_id, category, confi
 
 | 항목 | 값 |
 |---|---|
-| Edge Impulse 검증 정확도 | ⏳ _Edge Impulse 학습 결과 화면에서 기입_ |
-| Edge Impulse 테스트(95장) 정확도 | ⏳ _Model testing 결과에서 기입_ |
+| Edge Impulse 검증 정확도 | 미기록 (Edge Impulse 프로젝트 학습 결과에서 확인 가능) |
+| Edge Impulse 테스트(95장) 정확도 | 미기록 (Edge Impulse 프로젝트 Model testing에서 확인 가능) |
 | 펌웨어 크기 (CI 빌드 기준) | 플래시 1,505,753 B (45%) / 전역 RAM 63,036 B (19%) |
 
 ## 5. 실행 방법
@@ -111,19 +115,25 @@ py tools/fill_eval_sheet.py               # 최근 ei-1.0.1 로그 15건을 tria
 py tools/fill_eval_sheet.py --first-id N  # 시험 기록이 섞였으면 trial 1의 DB id 지정
 ```
 
-**결과**: ⏳ _실기기 평가 후 `docs/eval_results.md`(위 스크립트 출력)를 이 자리에 붙여넣기_
+**결과: 실기기 평가 미완료**
 
-| 항목 | 값 |
-|---|---|
-| 전체 정확도 (15회) | ⏳ |
-| 클래스별 정확도 (상의 / 하의 / 아우터) | ⏳ |
-| 평균 추론 시간 (DSP+NN, ESP32-S3) | ⏳ |
+평가 이미지 15장, 전체화면 뷰어, 평가표, 집계 스크립트는 준비했지만, 수정된 펌웨어의 실기기 업로드가 제출 시점까지 끝나지 않아 **평가를 진행하지 못했습니다.** 따라서 정확도·추론 시간 수치는 없습니다.
+
+| 항목 | 상태 | 근거 |
+|---|---|---|
+| 모델 포함 최종 펌웨어 빌드 | ✅ 확인 | CI `inference-firmware-build` 통과 |
+| 실기기 부팅: PSRAM 8MB 인식, OV3660(PID 0x3660) 초기화, Wi-Fi 연결 | ✅ 확인 | 첫 업로드 시 시리얼 출력 |
+| 실기기 추론 (`run_classifier`) | ❌ 미확인 | 첫 업로드에서 tensor arena 오류로 크래시([§8](#8-문제-해결-기록)). 수정본은 CI 빌드만 통과, 실기기 업로드 미완료 |
+| ESP32 → DB 저장 (`DB upload status: 201`) | ❌ 미확인 | 서버 API는 pytest로 검증, 실제 기기 로그는 0건 |
+| 15회 평가: 전체·클래스별 정확도, 평균 추론 시간 | ❌ 미수행 | |
+
+**남은 작업**: 수정된 라이브러리로 업로드 → 시리얼 `t`/`c`로 추론·저장 확인 → `closet.db` 초기화 후 15회 평가 → `py tools/fill_eval_sheet.py` 출력(`docs/eval_results.md`)을 이 자리에 기재.
 
 ## 8. 문제 해결 기록
 
 | 증상 | 원인 | 조치 |
 |---|---|---|
-| 첫 추론 시 `ERR: Failed to allocate persistent buffer of size 128, does not fit in tensor arena and reached EI_MAX_OVERFLOW_BUFFER_COUNT` 후 `Guru Meditation Error (StoreProhibited)`로 재부팅 | EON 모델의 tensor arena 크기 계산에 ESP-NN 커널의 계층별 persistent buffer가 포함되지 않음. 초과분 별도 할당 상한(10/30개)을 MobileNetV2가 넘고, 실패 시 NULL을 역참조 | `EI_MAX_OVERFLOW_BUFFER_COUNT`를 256으로 상향(`ei_classifier_porting.h`, `tflite_learn_*_compiled.cpp`). 추가 메모리 약 1KB |
+| 첫 추론 시 `ERR: Failed to allocate persistent buffer of size 128, does not fit in tensor arena and reached EI_MAX_OVERFLOW_BUFFER_COUNT` 후 `Guru Meditation Error (StoreProhibited)`로 재부팅 | EON 모델의 tensor arena 크기 계산에 ESP-NN 커널의 계층별 persistent buffer가 포함되지 않음. 초과분 별도 할당 상한(10/30개)을 MobileNetV2가 넘고, 실패 시 NULL을 역참조 | `EI_MAX_OVERFLOW_BUFFER_COUNT`를 256으로 상향(`ei_classifier_porting.h`, `tflite_learn_*_compiled.cpp`). 추가 메모리 약 1KB. **CI 빌드만 확인, 실기기에서 해결 여부는 미확인** |
 | `secrets.h`가 하위 폴더에서 Git 추적 대상이 됨 | `.gitignore`가 `firmware/secrets.h` 한 경로만 지정 | 모든 폴더의 `secrets.h` 무시로 변경. 실제 Wi-Fi 정보는 커밋된 적 없음 |
 | ESP32→서버 요청 차단 가능성 | 기존 python 허용 규칙이 Public 프로필 전용, 실제 네트워크는 Private | 8000/TCP, Private, LocalSubnet 한정 인바운드 규칙 추가 |
 
