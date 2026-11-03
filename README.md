@@ -1,5 +1,7 @@
 # MUSE Closet Vision
 
+[![Closet Vision CI](https://github.com/geonju2024/muse_closet/actions/workflows/ci.yml/badge.svg)](https://github.com/geonju2024/muse_closet/actions/workflows/ci.yml)
+
 Seeed Studio **XIAO ESP32S3 Sense (OV3660)** 가 카메라로 의류 사진을 촬영하고, **ESP32-S3 안에서 직접** 경량 CNN(MobileNetV2, INT8)을 실행해
 **상의(tops) / 하의(bottoms) / 아우터(outerwear)** 로 분류한 뒤, 추론 결과를 Wi-Fi로 노트북의 **FastAPI + SQLite** 에 로그로 저장하는 1일 MVP입니다.
 
