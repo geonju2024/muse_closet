@@ -7,3 +7,4 @@ backend/closet.db
 backend/*.db
 firmware/secrets.h
 .DS_Store
+data/
